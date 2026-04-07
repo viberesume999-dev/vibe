@@ -22,10 +22,18 @@
       background: white; display: flex; border-top: 1px solid #eee;
       z-index: 100;
     }
-    .tab-button {
-      flex: 1; padding: 12px; text-align: center; cursor: pointer;
-      border: none; background: none; font-size: 16px;
+        .tab-button {
+      flex: 1; 
+      padding: 12px; 
+      text-align: center; 
+      cursor: pointer;
+      border: none; 
+      background: none; 
+      font-size: 16px;
+      color: #5B3A29; /* Добавлен цвет текста для неактивных кнопок */
+      opacity: 0.7;   /* Немного прозрачности для неактивного состояния */
     }
+
     .tab-button.active { font-weight: bold; color: var(--primary-color); }
     .card {
       background: white; border-radius: var(--border-radius); padding: 16px;
