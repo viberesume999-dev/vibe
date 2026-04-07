@@ -20,12 +20,13 @@
     .tabs {
       position: fixed; bottom: 0; left: 0; right: 0;
       background: white; display: flex; border-top: 1px solid #eee;
+      z-index: 100;
     }
     .tab-button {
       flex: 1; padding: 12px; text-align: center; cursor: pointer;
-      border: none; background: none;
+      border: none; background: none; font-size: 16px;
     }
-    .tab-button.active { font-weight: bold; }
+    .tab-button.active { font-weight: bold; color: var(--primary-color); }
     .card {
       background: white; border-radius: var(--border-radius); padding: 16px;
       margin-bottom: 16px; box-shadow: var(--shadow);
@@ -59,7 +60,7 @@
       font-size: 40px; cursor: pointer; background: white;
       border-radius: 50%; width: 56px; height: 56px;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow); z-index: 100;
     }
     .quote { font-style: italic; color: #555; margin: 8px 0; }
     pre { white-space: pre-wrap; font-family: inherit; margin: 12px 0; }
@@ -86,17 +87,17 @@
   </div>
 </div>
 
-<!-- Вкладки -->
+<!-- Вкладки (меню) -->
 <div class="tabs">
-  <button class="tab-button active" onclick="openTab('gallery')">Галерея</button>
-  <button class="tab-button" onclick="openTab('create')">Создать</button>
-  <button class="tab-button" onclick="openTab('profile')">Профиль</button>
+  <button class="tab-button active" data-tab="gallery">Галерея</button>
+  <button class="tab-button" data-tab="create">Создать</button>
+  <button class="tab-button" data-tab="profile">Профиль</button>
 </div>
-
 <!-- Галерея -->
 <div id="gallery" class="tab-content active">
   <div class="card"><h3>Мои резюме</h3><div class="grid" id="gallery-grid"></div><button onclick="clearGallery()">Очистить галерею</button></div>
 </div>
+
 <!-- Создать -->
 <div id="create" class="tab-content">
   <div class="card">
@@ -131,7 +132,6 @@
     <p class="quote" id="daily-quote">Загрузка...</p>
     <p>До следующей рамки: <span id="progress-text">0/3</span></p>
     <div style="background:#eee;height:10px;border-radius:5px;margin:8px 0;"><div id="progress-bar" style="width:0;height:100%;background:#5B3A29;border-radius:5px;"></div></div>
-    <!-- Монетизация отключена (кнопки скрыты) -->
     <button onclick="clearData()">Очистить мои данные</button>
     <p>Создано резюме: <span id="resume-count">0</span></p>
     <button onclick="openOnboarding()">Изменить регион/сегмент</button>
@@ -149,22 +149,42 @@
     <span class="close" onclick="closeModal()">&times;</span>
     <h3>Ваше резюме</h3>
     <pre id="resume-content"></pre>
-    <button id="download-pdf-btn" onclick="downloadCurrentAsPDF()">Скачать PDF (бесплатно, тест)</button>
+    <button onclick="downloadCurrentAsPDF()">Скачать PDF (бесплатно, тест)</button>
     <button id="download-cover-btn" class="hidden" onclick="downloadCoverLetter()">Скачать сопроводительное</button>
   </div>
 </div>
 
 <script>
   // === НАСТРОЙКИ ===
-  const DEEPSEEK_PROXY_URL = 'ВАШ_CLOUDFLARE_WORKER_URL'; // Замените на ваш URL Worker
+  const DEEPSEEK_PROXY_URL = 'ВАШ_CLOUDFLARE_WORKER_URL'; // ЗАМЕНИТЕ НА ВАШ URL
   let generationCountToday = parseInt(localStorage.getItem('generationCount') || '0');
   let currentResumeText = '';
   let currentCoverText = '';
   let currentUserName = '';
 
-  // === VK Bridge ===
-  const vk = window.vkBridge;
-  vk.send('VKWebAppInit');
+  // === Переключение вкладок ===
+  document.querySelectorAll('.tab-button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabId = btn.getAttribute('data-tab');
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+    });
+  });
+
+  // === Режимы создания ===
+  window.toggleMode = function() {
+    const mode = document.querySelector('input[name="mode"]:checked').value;
+    document.getElementById('simple-mode').classList.toggle('hidden', mode !== 'simple');
+    document.getElementById('vacancy-mode').classList.toggle('hidden', mode !== 'vacancy');
+  };
+// === VK Bridge (без ошибок вне VK) ===
+  let vkBridge = { send: () => Promise.resolve() };
+  if (window.vkBridge) {
+    vkBridge = window.vkBridge;
+    try { vkBridge.send('VKWebAppInit'); } catch(e) { console.log('VK Bridge не инициализирован'); }
+  }
 
   // === Первый запуск ===
   if (!localStorage.getItem('onboarded')) {
@@ -181,7 +201,7 @@
   document.getElementById('start-btn').addEventListener('click', function() {
     if (!document.getElementById('consent1').checked) return;
     localStorage.setItem('region', document.getElementById('region').value);
-localStorage.setItem('segment', document.getElementById('segment').value);
+    localStorage.setItem('segment', document.getElementById('segment').value);
     localStorage.setItem('consent1', 'true');
     localStorage.setItem('consent2', document.getElementById('consent2').checked);
     localStorage.setItem('onboarded', 'true');
@@ -190,28 +210,14 @@ localStorage.setItem('segment', document.getElementById('segment').value);
     loadGallery();
   });
 
-  // === Переключение вкладок ===
-  window.openTab = function(tabName) {
-    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-    document.getElementById(tabName).classList.add('active');
-    event.target.classList.add('active');
-  };
-
-  window.toggleMode = function() {
-    const mode = document.querySelector('input[name="mode"]:checked').value;
-    document.getElementById('simple-mode').classList.toggle('hidden', mode !== 'simple');
-    document.getElementById('vacancy-mode').classList.toggle('hidden', mode !== 'vacancy');
-  };
-
-  // === Санитизация (удаляем email и телефон) ===
+  // === Санитизация ===
   function sanitizeText(text) {
     return text
       .replace(/\b[\w\.-]+@[\w\.-]+\.\w{2,}\b/g, '[EMAIL]')
       .replace(/\+?[78]\s?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}/g, '[PHONE]');
   }
 
-  // === Генерация через DeepSeek (через Worker) ===
+  // === Генерация через DeepSeek ===
   async function generateViaDeepSeek(prompt) {
     try {
       const res = await fetch(DEEPSEEK_PROXY_URL, {
@@ -230,13 +236,11 @@ localStorage.setItem('segment', document.getElementById('segment').value);
   function fallbackTemplate(style, isCover = false) {
     const templates = {
       resume: [
-        ✨ Ваше резюме в стиле "${style}" готово! Мы подчеркнули ваши сильные стороны и сделали текст живым.,
-        🔥 Стиль "${style}" добавил харизмы вашему опыту. Такое резюме точно заметят.,
-        🎨 Мы переписали ваше резюме в стиле "${style}". Оно стало ярким и профессиональным.
+        ✨ Ваше резюме в стиле "${style}" готово! Мы подчеркнули ваши сильные стороны.,
+        🔥 Стиль "${style}" добавил харизмы вашему опыту. Такое резюме точно заметят.
       ],
       cover: [
-        Здравствуйте! Меня заинтересовала ваша вакансия. Мой опыт и навыки, описанные в резюме, отлично подходят для этой роли. Буду рад обсудить детали.,
-        Компания произвела на меня впечатление. Уверен, что смогу принести пользу. Прилагаю резюме.
+        Здравствуйте! Меня заинтересовала ваша вакансия. Мой опыт и навыки отлично подходят. Буду рад обсудить детали.
       ]
     };
     const list = isCover ? templates.cover : templates.resume;
@@ -321,7 +325,6 @@ const userName = document.getElementById('user-name-vacancy').value;
     if (confirm('Очистить галерею?')) { localStorage.removeItem('gallery'); loadGallery(); }
   };
 
-  // === Модальное окно ===
   window.showResumeModal = function(resume, cover) {
     document.getElementById('resume-content').textContent = resume;
     const coverBtn = document.getElementById('download-cover-btn');
@@ -350,30 +353,22 @@ const userName = document.getElementById('user-name-vacancy').value;
     doc.save('cover_letter.pdf');
   };
 
-  // === Профиль ===
   window.loadProfile = function() {
     const gallery = JSON.parse(localStorage.getItem('gallery') || '[]');
     document.getElementById('resume-count').textContent = gallery.length;
     const progress = generationCountToday % 3;
     document.getElementById('progress-text').textContent = ${progress}/3;
     document.getElementById('progress-bar').style.width = ${(progress / 3) * 100}%;
-    const quotes = [
-      "Сделай шаг — и дорога появится.", "Ты сильнее, чем думаешь.",
-"Каждый день — новая возможность.", "Твоя история уникальна."
-    ];
+    const quotes = ["Сделай шаг — и дорога появится.", "Ты сильнее, чем думаешь.", "Каждый день — новая возможность."];
     document.getElementById('daily-quote').textContent = quotes[Math.floor(Math.random() * quotes.length)];
-  };
+};
   window.clearData = function() {
     if (confirm('Удалить все данные?')) { localStorage.clear(); location.reload(); }
   };
   window.openOnboarding = function() { document.getElementById('onboarding-modal').style.display = 'flex'; };
 
-  // === Персонаж ===
-  const phrases = ["Я тут, чтобы помочь!", "Ты справишься!", "Всё получится!", "Я верю в тебя!"];
+  const phrases = ["Я тут, чтобы помочь!", "Ты справишься!", "Всё получится!"];
   window.showGuardianPhrase = function() { alert(phrases[Math.floor(Math.random() * phrases.length)]); };
-
-  // === Инструкция ===
-  console.log('Для включения монетизации: раскомментируйте кнопки VK Pay в HTML и JS');
 </script>
 </body>
 </html>
