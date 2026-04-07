@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -14,137 +13,56 @@
       --shadow: 0 4px 12px rgba(0,0,0,0.08);
       --primary-color: #5B3A29;
     }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, sans-serif;
-    }
-
-    body {
-      background-color: var(--bg-color);
-      padding: 16px;
-      padding-bottom: 80px;
-    }
-
-    .tab-content {
-      display: none;
-    }
-
-    .active {
-      display: block;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+    body { background-color: var(--bg-color); padding: 16px; padding-bottom: 80px; }
+    .tab-content { display: none; }
+    .active { display: block; }
     .tabs {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: white;
-      display: flex;
-      border-top: 1px solid #eee;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: white; display: flex; border-top: 1px solid #eee;
     }
-
     .tab-button {
-      flex: 1;
-      padding: 12px;
-      text-align: center;
-      cursor: pointer;
-      border: none;
-      background: none;
+      flex: 1; padding: 12px; text-align: center; cursor: pointer;
+      border: none; background: none;
     }
-
-    .tab-button.active {
-      font-weight: bold;
-    }
-
+    .tab-button.active { font-weight: bold; }
     .card {
-      background: white;
-      border-radius: var(--border-radius);
-      padding: 16px;
-      margin-bottom: 16px;
+      background: white; border-radius: var(--border-radius); padding: 16px;
+      margin-bottom: 16px; box-shadow: var(--shadow);
+    }
+    input, textarea, select, button {
+      width: 100%; padding: 12px; margin-top: 8px;
+      border-radius: var(--border-radius); border: 1px solid #ddd;
+    }
+    button {
+      background-color: var(--primary-color); color: white; border: none; cursor: pointer;
+    }
+    button:disabled { background-color: #ccc; cursor: not-allowed; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .frame {
+      aspect-ratio: 1; background: #f0f0f0; border-radius: var(--border-radius);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; cursor: pointer;
+    }
+    .modal {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-content {
+      background: white; padding: 20px; border-radius: var(--border-radius);
+      max-width: 90%; max-height: 80%; overflow-y: auto;
+    }
+    .close { float: right; font-size: 24px; cursor: pointer; }
+    .hidden { display: none; }
+    .guardian {
+      position: fixed; bottom: 80px; right: 16px;
+      font-size: 40px; cursor: pointer; background: white;
+      border-radius: 50%; width: 56px; height: 56px;
+      display: flex; align-items: center; justify-content: center;
       box-shadow: var(--shadow);
     }
-
-    input, textarea, select, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 8px;
-      border-radius: var(--border-radius);
-      border: 1px solid #ddd;
-    }
-
-    button {
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-
-    .frame {
-      aspect-ratio: 1;
-      background: #f0f0f0;
-      border-radius: var(--border-radius);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      cursor: pointer;
-    }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: var(--border-radius);
-      max-width: 90%;
-      max-height: 80%;
-      overflow-y: auto;
-    }
-
-    .close {
-      float: right;
-      font-size: 24px;
-      cursor: pointer;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .guardian {
-      position: fixed;
-      bottom: 80px;
-      right: 16px;
-      font-size: 32px;
-      cursor: pointer;
-    }
-
-    .quote {
-      font-style: italic;
-      color: #555;
-    }
+    .quote { font-style: italic; color: #555; margin: 8px 0; }
+    pre { white-space: pre-wrap; font-family: inherit; margin: 12px 0; }
   </style>
 </head>
 <body>
@@ -155,23 +73,15 @@
     <h2>Добро пожаловать в VibeResume</h2>
     <label>Регион:</label>
     <select id="region">
-      <option>Москва</option>
-      <option>Санкт-Петербург</option>
-      <option>Мой регион</option>
-      <option>Удалёнка</option>
+      <option>Москва</option><option>Санкт-Петербург</option>
+      <option>Мой регион</option><option>Удалёнка</option>
     </select>
     <label>Сегмент:</label>
     <select id="segment">
-      <option>Студент</option>
-      <option>Женщина</option>
-      <option>Обычный соискатель</option>
+      <option>Студент</option><option>Женщина</option><option>Обычный соискатель</option>
     </select>
-    <label>
-      <input type="checkbox" id="consent1" required> Я согласен на обработку текста резюме для генерации
-    </label>
-    <label>
-      <input type="checkbox" id="consent2"> Я согласен на сохранение имени на моём устройстве для PDF
-    </label>
+    <label><input type="checkbox" id="consent1" required> Я согласен на обработку текста резюме для генерации</label>
+    <label><input type="checkbox" id="consent2"> Я согласен на сохранение имени на моём устройстве для PDF</label>
     <button id="start-btn" disabled>Начать</button>
   </div>
 </div>
@@ -185,51 +95,32 @@
 
 <!-- Галерея -->
 <div id="gallery" class="tab-content active">
-  <div class="card">
-    <h3>Мои резюме</h3>
-    <div class="grid" id="gallery-grid">
-      <!-- рамки будут добавляться сюда -->
-    </div>
-    <button onclick="clearGallery()">Очистить галерею</button>
-  </div>
+  <div class="card"><h3>Мои резюме</h3><div class="grid" id="gallery-grid"></div><button onclick="clearGallery()">Очистить галерею</button></div>
 </div>
-
 <!-- Создать -->
 <div id="create" class="tab-content">
   <div class="card">
-    <label>
-      <input type="radio" name="mode" value="simple" checked onchange="toggleMode()"> Просто вайб-резюме
-    </label>
-    <label>
-      <input type="radio" name="mode" value="vacancy" onchange="toggleMode()"> Под вакансию
-    </label>
+    <label><input type="radio" name="mode" value="simple" checked onchange="toggleMode()"> Просто вайб-резюме</label>
+    <label><input type="radio" name="mode" value="vacancy" onchange="toggleMode()"> Под вакансию</label>
   </div>
-
   <div class="card" id="simple-mode">
-    <textarea id="resume-text" placeholder="Уберите имя, телефон, email — они не нужны"></textarea>
-    <input type="text" id="user-name" placeholder="Ваше имя (для PDF)">
+    <textarea id="resume-text" placeholder="Вставьте текст резюме (имя, телефон, email можно не убирать — они автоматически удалятся)"></textarea>
+    <input type="text" id="user-name" placeholder="Ваше имя (для PDF, опционально)">
     <select id="style-simple">
-      <option>Дерзкий</option>
-      <option>Мягкий</option>
-      <option>Киберпанк</option>
-      <option>Минимализм</option>
-      <option>Поэтичный</option>
+      <option>Дерзкий</option><option>Мягкий</option><option>Киберпанк</option>
+      <option>Минимализм</option><option>Поэтичный</option>
     </select>
     <button onclick="generateSimple()">Сгенерировать</button>
   </div>
-
   <div class="card hidden" id="vacancy-mode">
-    <textarea id="resume-text-vacancy" placeholder="Ваше резюме"></textarea>
+    <textarea id="resume-text-vacancy" placeholder="Текст вашего резюме"></textarea>
     <textarea id="vacancy-text" placeholder="Текст вакансии"></textarea>
-    <input type="text" id="user-name-vacancy" placeholder="Ваше имя (для PDF)">
+    <input type="text" id="user-name-vacancy" placeholder="Ваше имя (для PDF, опционально)">
     <select id="style-vacancy">
-      <option>Дерзкий</option>
-      <option>Мягкий</option>
-      <option>Киберпанк</option>
-      <option>Минимализм</option>
-      <option>Поэтичный</option>
+      <option>Дерзкий</option><option>Мягкий</option><option>Киберпанк</option>
+      <option>Минимализм</option><option>Поэтичный</option>
     </select>
-    <button onclick="generateVacancy()">Создать резюме и сопроводительное</button>
+    <button onclick="generateVacancy()">Создать резюме + сопроводительное</button>
   </div>
 </div>
 
@@ -239,16 +130,13 @@
     <h3>Профиль</h3>
     <p class="quote" id="daily-quote">Загрузка...</p>
     <p>До следующей рамки: <span id="progress-text">0/3</span></p>
-    <div style="background:#eee;height:10px;border-radius:5px;margin:8px 0;">
-      <div id="progress-bar" style="width:0;height:100%;background:#5B3A29;border-radius:5px;"></div>
-    </div>
-    <button id="premium-btn" class="hidden">Премиум стили (199 ₽)</button>
+    <div style="background:#eee;height:10px;border-radius:5px;margin:8px 0;"><div id="progress-bar" style="width:0;height:100%;background:#5B3A29;border-radius:5px;"></div></div>
+    <!-- Монетизация отключена (кнопки скрыты) -->
     <button onclick="clearData()">Очистить мои данные</button>
     <p>Создано резюме: <span id="resume-count">0</span></p>
     <button onclick="openOnboarding()">Изменить регион/сегмент</button>
-    <p><a href="https://vk.com/clubВАШ_ID_СООБЩЕСТВА_VK?w=wall-ВАШ_ID_СООБЩЕСТВА_VK_1" target="_blank">Пользовательское соглашение</a></p>
-    <p><a href="https://vk.com/clubВАШ_ID_СООБЩЕСТВА_VK?w=wall-ВАШ_ID_СООБЩЕСТВА_VK_2" target="_blank">Политика конфиденциальности</a></p>
-    <p><a href="https://vk.com/clubВАШ_ID_СООБЩЕСТВА_VK" target="_blank">Поддержка</a></p>
+    <p><a href="#" target="_blank">Пользовательское соглашение</a> | <a href="#" target="_blank">Политика конфиденциальности</a></p>
+    <p><a href="#" target="_blank">Поддержка</a></p>
   </div>
 </div>
 
@@ -261,80 +149,22 @@
     <span class="close" onclick="closeModal()">&times;</span>
     <h3>Ваше резюме</h3>
     <pre id="resume-content"></pre>
-    <button id="buy-pdf-btn" onclick="downloadPDF()">Скачать PDF</button>
-    <button id="download-cover-btn" class="hidden" onclick="downloadCover()">Скачать сопроводительное</button>
+    <button id="download-pdf-btn" onclick="downloadCurrentAsPDF()">Скачать PDF (бесплатно, тест)</button>
+    <button id="download-cover-btn" class="hidden" onclick="downloadCoverLetter()">Скачать сопроводительное</button>
   </div>
 </div>
 
 <script>
-  // === ИНИЦИАЛИЗАЦИЯ ===
+  // === НАСТРОЙКИ ===
+  const DEEPSEEK_PROXY_URL = 'ВАШ_CLOUDFLARE_WORKER_URL'; // Замените на ваш URL Worker
+  let generationCountToday = parseInt(localStorage.getItem('generationCount') || '0');
+  let currentResumeText = '';
+  let currentCoverText = '';
+  let currentUserName = '';
+
+  // === VK Bridge ===
   const vk = window.vkBridge;
-  let platform = '';
-  let resumeCount = 0;
-  let generationCount = 0;
-  let currentResume = '';
-  let currentCoverLetter = '';
-  let currentName = '';
-
-  // Заглушки
-  const DEEPSEEK_PROXY_URL = 'https://deepseek-proxy.viberesume999.workers.dev';
-
-  // Цитаты и фразы
-  const quotes = [
-    "Сделай шаг — и дорога появится сама.",
-    "Ты сильнее, чем думаешь.",
-    "Каждый день — это новая возможность.",
-    "Ты не просто соискатель — ты создатель своей истории.",
-    "Вдохновение приходит к тем, кто действует.",
-    "Не бойся начинать с нуля.",
-    "Твоя история уникальна — расскажи её правильно.",
-    "Ты уже на пути к успеху.",
-    "Маленькие шаги ведут к большим результатам.",
-    "Ты не просто ищешь работу — ты ищешь себя.",
-    "Ты заслуживаешь лучшего.",
-    "Каждое резюме — это шаг к новой жизни.",
-    "Ты не просто соискатель — ты творец своей судьбы.",
-    "Твоя уверенность — твой главный актив.",
-    "Ты уже сделал первый шаг — продолжай.",
-    "Ты не просто ищешь работу — ты строишь карьеру.",
-    "Ты заслуживаешь уважения и признания.",
-    "Твоя история — твой главный актив.",
-    "Ты не просто соискатель — ты лидер.",
-    "Ты уже на правильном пути.",
-    "Ты не просто ищешь работу — ты создаешь будущее.",
-    "Ты заслуживаешь счастья и успеха.",
-    "Твоя уверенность — твой главный инструмент.",
-    "Ты не просто соискатель — ты победитель.",
-    "Ты уже сделал важный шаг — продолжай.",
-    "Ты не просто ищешь работу — ты ищешь призвание.",
-    "Ты заслуживаешь уважения и признания.",
-    "Твоя история — твой главный капитал.",
-    "Ты не просто соискатель — ты герой своей истории.",
-    "Ты уже на пути к велию."
-  ];
-
-  const guardianPhrases = [
-    "Я тут, чтобы помочь!",
-    "Не забывай дышать!",
-    "Ты справишься!",
-    "Всё получится!",
-    "Ты молодец!",
-    "Я верю в тебя!",
-    "Ты на правильном пути!",
-    "Ты уже далеко зашёл!",
-    "Ты — творец своей судьбы!",
-    "Ты заслуживаешь всего самого лучшего!"
-  ];
-
-  // === VK Bridge и платформа ===
   vk.send('VKWebAppInit');
-  vk.send('VKWebAppGetLaunchParams').then(data => {
-    if (data.sign) {
-      // Здесь можно проверить подпись, но для упрощения пропустим
-    }
-    platform = data.platform || 'web';
-    checkPaymentSupport();
-  });
 
   // === Первый запуск ===
   if (!localStorage.getItem('onboarded')) {
@@ -348,104 +178,41 @@
   document.getElementById('consent1').addEventListener('change', function() {
     document.getElementById('start-btn').disabled = !this.checked;
   });
-
   document.getElementById('start-btn').addEventListener('click', function() {
-    const region = document.getElementById('region').value;
-    const segment = document.getElementById('segment').value;
-    const consent1 = document.getElementById('consent1').checked;
-    const consent2 = document.getElementById('consent2').checked;
-
-    if (!consent1) return;
-
-    localStorage.setItem('region', region);
-    localStorage.setItem('segment', segment);
-    localStorage.setItem('consent1', consent1);
-    localStorage.setItem('consent2', consent2);
+    if (!document.getElementById('consent1').checked) return;
+    localStorage.setItem('region', document.getElementById('region').value);
+localStorage.setItem('segment', document.getElementById('segment').value);
+    localStorage.setItem('consent1', 'true');
+    localStorage.setItem('consent2', document.getElementById('consent2').checked);
     localStorage.setItem('onboarded', 'true');
-
     document.getElementById('onboarding-modal').style.display = 'none';
     loadProfile();
     loadGallery();
   });
 
   // === Переключение вкладок ===
-  function openTab(tabName) {
+  window.openTab = function(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
     document.getElementById(tabName).classList.add('active');
     event.target.classList.add('active');
-  }
+  };
 
-  // === Режимы создания ===
-  function toggleMode() {
+  window.toggleMode = function() {
     const mode = document.querySelector('input[name="mode"]:checked').value;
     document.getElementById('simple-mode').classList.toggle('hidden', mode !== 'simple');
     document.getElementById('vacancy-mode').classList.toggle('hidden', mode !== 'vacancy');
+  };
+
+  // === Санитизация (удаляем email и телефон) ===
+  function sanitizeText(text) {
+    return text
+      .replace(/\b[\w\.-]+@[\w\.-]+\.\w{2,}\b/g, '[EMAIL]')
+      .replace(/\+?[78]\s?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}/g, '[PHONE]');
   }
 
-  // === Генерация ===
-  async function generateSimple() {
-    const text = document.getElementById('resume-text').value;
-    const name = document.getElementById('user-name').value;
-    const style = document.getElementById('style-simple').value;
-
-    if (!text.trim()) {
-      alert('Введите текст резюме');
-      return;
-    }
-
-    if (generationCount >= 5) {
-      alert('Лимит генераций на сегодня исчерпан');
-      return;
-    }
-
-    const cleanText = sanitizeText(text);
-    const prompt = `Стиль: ${style}. Текст резюме: ${cleanText}`;
-
-    let result = await tryDeepSeek(prompt);
-    if (!result) result = fallbackTemplate(style);
-
-    currentResume = result;
-    currentName = name;
-    saveToGallery(style, result);
-    showResumeModal(result, '', name);
-  }
-
-  async function generateVacancy() {
-    const resume = document.getElementById('resume-text-vacancy').value;
-    const vacancy = document.getElementById('vacancy-text').value;
-    const name = document.getElementById('user-name-vacancy').value;
-    const style = document.getElementById('style-vacancy').value;
-
-    if (!resume.trim() || !vacancy.trim()) {
-      alert('Заполните оба поля');
-      return;
-    }
-
-    if (generationCount >= 5) {
-      alert('Лимит генераций на сегодня исчерпан');
-      return;
-    }
-
-    const cleanResume = sanitizeText(resume);
-    const cleanVacancy = sanitizeText(vacancy);
-    const prompt = `Стиль: ${style}. Резюме: ${cleanResume}. Вакансия: ${cleanVacancy}`;
-
-    let resumeResult = await tryDeepSeek(prompt);
-    if (!resumeResult) resumeResult = fallbackTemplate(style);
-
-    let coverResult = await tryDeepSeek(`Напиши сопроводительное письмо в стиле ${style} для резюме: ${cleanResume} и вакансии: ${cleanVacancy}`);
-    if (!coverResult) coverResult = "Сопроводительное письмо не удалось сгенерировать.";
-
-    currentResume = resumeResult;
-    currentCoverLetter = coverResult;
-    currentName = name;
-    saveToGallery(style, resumeResult, coverResult);
-    showResumeModal(resumeResult, coverResult, name);
-  }
-
-  // === API вызовы ===
-  async function tryDeepSeek(prompt) {
+  // === Генерация через DeepSeek (через Worker) ===
+  async function generateViaDeepSeek(prompt) {
     try {
       const res = await fetch(DEEPSEEK_PROXY_URL, {
         method: 'POST',
@@ -456,66 +223,88 @@
         const data = await res.json();
         return data.result;
       }
-    } catch (e) {
-      console.error('DeepSeek error:', e);
-    }
+    } catch(e) { console.error(e); }
     return null;
   }
 
-  function fallbackTemplate(style) {
-    const templates = [
-      `Ваше резюме в стиле ${style} готово! Мы подчеркнули ваши сильные стороны и сделали текст живым и запоминающимся.`,
-      `Мы создали резюме, которое точно привлечёт внимание. Стиль ${style} добавляет изюминку вашему профилю.`,
-      `Ваш опыт заслуживает лучшего описания. Мы оформили его в стиле ${style}, чтобы выделить вас среди других.`,
-      `Стиль ${style} идеально подходит для вашего опыта. Резюме получилось ярким и профессиональным.`,
-      `Мы подчеркнули вашу уникальность с помощью стиля ${style}. Теперь ваше резюме точно запомнится.`,
-      `Ваше резюме теперь звучит как никогда. Стиль ${style} добавил ему характера и харизмы.`,
-      `Мы превратили ваш опыт в историю успеха. Стиль ${style} сделал её живой и убедительной.`,
-      `Стиль ${style} помог раскрыть ваш потенциал. Резюме теперь работает на ваш успех.`,
-      `Мы создали резюме, которое говорит за вас. Стиль ${style} добавил ему уверенности и силы.`,
-      `Ваше резюме теперь не просто текст — это заявление. Стиль ${style} придал ему мощи.`,
-      `Мы оформили ваш опыт в стиле ${style}, чтобы он выделялся. Теперь вы точно запомнитесь.`,
-      `Стиль ${style} сделал ваше резюме уникальным. Оно теперь работает на вашу репутацию.`,
-      `Мы подчеркнули вашу индивидуальность с помощью стиля ${style}. Резюме теперь звучит уверенно.`,
-      `Ваше резюме теперь отражает вашу суть. Стиль ${style} добавил ему глубины и смысла.`,
-      `Мы создали резюме, которое говорит о вас всё. Стиль ${style} придал ему яркости и выразительности.`
-    ];
-    return templates[Math.floor(Math.random() * templates.length)];
-  }
-
-  // === Санитизация ===
-  function sanitizeText(text) {
-    return text
-      .replace(/\b[\w\.-]+@[\w\.-]+\.\w{2,}\b/g, '[EMAIL]')
-      .replace(/\+?[78]\s?(\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2})/g, '[PHONE]');
-  }
-
-  // === Галерея ===
-  function saveToGallery(style, resume, cover = '') {
-    const gallery = JSON.parse(localStorage.getItem('gallery') || '[]');
-    const emojiMap = {
-      'Дерзкий': '🔥',
-      'Мягкий': '🌸',
-      'Киберпанк': '🤖',
-      'Минимализм': '⬜',
-      'Поэтичный': '🖋️'
+  function fallbackTemplate(style, isCover = false) {
+    const templates = {
+      resume: [
+        ✨ Ваше резюме в стиле "${style}" готово! Мы подчеркнули ваши сильные стороны и сделали текст живым.,
+        🔥 Стиль "${style}" добавил харизмы вашему опыту. Такое резюме точно заметят.,
+        🎨 Мы переписали ваше резюме в стиле "${style}". Оно стало ярким и профессиональным.
+      ],
+      cover: [
+        Здравствуйте! Меня заинтересовала ваша вакансия. Мой опыт и навыки, описанные в резюме, отлично подходят для этой роли. Буду рад обсудить детали.,
+        Компания произвела на меня впечатление. Уверен, что смогу принести пользу. Прилагаю резюме.
+      ]
     };
-    gallery.push({
-      id: Date.now(),
-      style,
-      emoji: emojiMap[style] || '📄',
-      resume,
-      cover,
-      timestamp: new Date().toISOString()
+    const list = isCover ? templates.cover : templates.resume;
+    return list[Math.floor(Math.random() * list.length)];
+  }
+
+  // === Генерация простого резюме ===
+  window.generateSimple = async function() {
+    let rawText = document.getElementById('resume-text').value;
+    if (!rawText.trim()) { alert('Введите текст резюме'); return; }
+    if (generationCountToday >= 5) { alert('Лимит 5 генераций в день'); return; }
+
+    const userName = document.getElementById('user-name').value;
+    const style = document.getElementById('style-simple').value;
+    const cleanText = sanitizeText(rawText);
+    const prompt = Перепиши резюме в стиле "${style}". Сохрани все ключевые факты, сделай текст живым, но профессиональным. Не добавляй имя, телефон, email. Вот текст: ${cleanText};
+
+    let result = await generateViaDeepSeek(prompt);
+    if (!result) result = fallbackTemplate(style, false);
+
+    currentResumeText = result;
+    currentUserName = userName;
+    currentCoverText = '';
+    saveToGallery(style, result, '', userName);
+    showResumeModal(result, '');
+  };
+
+  // === Генерация под вакансию ===
+  window.generateVacancy = async function() {
+    const resumeText = document.getElementById('resume-text-vacancy').value;
+    const vacancyText = document.getElementById('vacancy-text').value;
+    if (!resumeText.trim() || !vacancyText.trim()) { alert('Заполните оба поля'); return; }
+    if (generationCountToday >= 5) { alert('Лимит 5 генераций в день'); return; }
+const userName = document.getElementById('user-name-vacancy').value;
+    const style = document.getElementById('style-vacancy').value;
+    const cleanResume = sanitizeText(resumeText);
+    const cleanVacancy = sanitizeText(vacancyText);
+    const resumePrompt = Адаптируй резюме под эту вакансию. Стиль: "${style}". Резюме: ${cleanResume}. Вакансия: ${cleanVacancy}. Не добавляй имя, телефон, email.;
+    const coverPrompt = Напиши короткое сопроводительное письмо в стиле "${style}" к резюме: ${cleanResume}. Вакансия: ${cleanVacancy}. Без имени, без контактов.;
+
+    let resumeResult = await generateViaDeepSeek(resumePrompt);
+    if (!resumeResult) resumeResult = fallbackTemplate(style, false);
+    let coverResult = await generateViaDeepSeek(coverPrompt);
+    if (!coverResult) coverResult = fallbackTemplate(style, true);
+
+    currentResumeText = resumeResult;
+    currentCoverText = coverResult;
+    currentUserName = userName;
+    saveToGallery(style, resumeResult, coverResult, userName);
+    showResumeModal(resumeResult, coverResult);
+  };
+
+  // === Сохранение в галерею ===
+  function saveToGallery(style, resume, cover, userName) {
+    const gallery = JSON.parse(localStorage.getItem('gallery') || '[]');
+    const emojiMap = { 'Дерзкий':'🔥', 'Мягкий':'🌸', 'Киберпанк':'🤖', 'Минимализм':'⬜', 'Поэтичный':'🖋️' };
+    gallery.unshift({
+      id: Date.now(), style, emoji: emojiMap[style] || '📄',
+      resume, cover, userName, timestamp: new Date().toISOString()
     });
     localStorage.setItem('gallery', JSON.stringify(gallery));
+    generationCountToday++;
+    localStorage.setItem('generationCount', generationCountToday);
     loadGallery();
-    generationCount++;
-    localStorage.setItem('generationCount', generationCount);
-    updateProfile();
+    loadProfile();
   }
 
-  function loadGallery() {
+  window.loadGallery = function() {
     const gallery = JSON.parse(localStorage.getItem('gallery') || '[]');
     const grid = document.getElementById('gallery-grid');
     grid.innerHTML = '';
@@ -526,145 +315,65 @@
       div.onclick = () => showResumeModal(item.resume, item.cover);
       grid.appendChild(div);
     });
-  }
+  };
 
-  function clearGallery() {
-    if (confirm('Очистить галерею?')) {
-      localStorage.removeItem('gallery');
-      loadGallery();
-    }
-  }
+  window.clearGallery = function() {
+    if (confirm('Очистить галерею?')) { localStorage.removeItem('gallery'); loadGallery(); }
+  };
 
-  // === Модальное окно резюме ===
-  function showResumeModal(resume, cover = '', name = '') {
+  // === Модальное окно ===
+  window.showResumeModal = function(resume, cover) {
     document.getElementById('resume-content').textContent = resume;
-    document.getElementById('download-cover-btn').classList.toggle('hidden', !cover);
-    currentResume = resume;
-    currentCoverLetter = cover;
-    currentName = name;
+    const coverBtn = document.getElementById('download-cover-btn');
+    if (cover && cover.trim()) {
+      coverBtn.classList.remove('hidden');
+      currentCoverText = cover;
+    } else {
+      coverBtn.classList.add('hidden');
+      currentCoverText = '';
+    }
     document.getElementById('resume-modal').style.display = 'flex';
-  }
+  };
+  window.closeModal = function() { document.getElementById('resume-modal').style.display = 'none'; };
 
-  function closeModal() {
-    document.getElementById('resume-modal').style.display = 'none';
-  }
-
-  // === Генерация PDF (бесплатная) ===
-  function downloadPDF() {
+  window.downloadCurrentAsPDF = function() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    const splitText = doc.splitTextToSize(currentResume, 180);
-    doc.text(splitText, 10, 10);
-    if (currentName) doc.text(`Имя: ${currentName}`, 10, 20 + (splitText.length * 5));
+    doc.text(currentResumeText, 10, 10);
+    if (currentUserName) doc.text(Имя: ${currentUserName}, 10, 50);
     doc.save('resume.pdf');
-  }
-
-  function downloadCover() {
-    const blob = new Blob([currentCoverLetter], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'cover_letter.txt';
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  };
+  window.downloadCoverLetter = function() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.text(currentCoverText, 10, 10);
+    doc.save('cover_letter.pdf');
+  };
 
   // === Профиль ===
-  function loadProfile() {
-    resumeCount = JSON.parse(localStorage.getItem('gallery') || '[]').length;
-    generationCount = parseInt(localStorage.getItem('generationCount') || '0');
-    updateProfile();
+  window.loadProfile = function() {
+    const gallery = JSON.parse(localStorage.getItem('gallery') || '[]');
+    document.getElementById('resume-count').textContent = gallery.length;
+    const progress = generationCountToday % 3;
+    document.getElementById('progress-text').textContent = ${progress}/3;
+    document.getElementById('progress-bar').style.width = ${(progress / 3) * 100}%;
+    const quotes = [
+      "Сделай шаг — и дорога появится.", "Ты сильнее, чем думаешь.",
+"Каждый день — новая возможность.", "Твоя история уникальна."
+    ];
     document.getElementById('daily-quote').textContent = quotes[Math.floor(Math.random() * quotes.length)];
-  }
-
-  function updateProfile() {
-    document.getElementById('resume-count').textContent = resumeCount;
-    const progress = generationCount % 3;
-    document.getElementById('progress-text').textContent = `${progress}/3`;
-    document.getElementById('progress-bar').style.width = `${(progress / 3) * 100}%`;
-  }
-
-  function clearData() {
-    if (confirm('Очистить все данные?')) {
-      localStorage.clear();
-      location.reload();
-    }
-  }
-
-  function openOnboarding() {
-    document.getElementById('onboarding-modal').style.display = 'flex';
-  }
-
-  // === Платёжная система (отключена) ===
-  function checkPaymentSupport() {
-    // Монетизация отключена - кнопки скрыты
-    document.getElementById('premium-btn').classList.add('hidden');
-    // document.getElementById('buy-pdf-btn').classList.toggle('hidden', !supportsPay);
-    // if (!supportsPay) {
-    //   document.getElementById('buy-pdf-btn').textContent = 'Доступно на сайте VK';
-    // }
-  }
-
-  // === Персонаж-хранитель ===
-  function showGuardianPhrase() {
-    alert(guardianPhrases[Math.floor(Math.random() * guardianPhrases.length)]);
-  }
-
-  // === Инструкция по установке ===
-  /*
-  === ИНСТРУКЦИЯ ПО УСТАНОВКЕ ===
-
-  1. Загрузите этот файл на GitHub Pages:
-     - Создайте репозиторий на GitHub
-     - Загрузите этот файл как index.html
-     - Включите GitHub Pages в настройках репозитория
-
-  2. Создайте Cloudflare Worker для защиты API-ключей:
-     - Зарегистрируйтесь на Cloudflare
-     - Создайте новый Worker
-     - Вставьте код из отдельного файла (см. ниже)
-     - Добавьте переменные окружения: DEEPSEEK_API_KEY
-
-  3. Подключите Mini App к сообществу VK:
-     - Перейдите в "Управление сообществом" -> "Работа с API" -> "Mini Apps"
-     - Добавьте новое приложение, указав URL GitHub Pages
-     - Укажите ID сообщества
-
-  4. Настройте VK Pay:
-     - В "Работа с API" -> "VK Pay" включите приём платежей
-     - Укажите банковские реквизиты
-
-  5. Получите API-ключи:
-     - DeepSeek: https://api-docs.deepseek.com/
-
-  6. Создайте посты в сообществе:
-     - Пользовательское соглашение
-     - Политика конфиденциальности
-     - Укажите их ID в ссылках в коде
-
-  === КОД CLOUDFLARE WORKER ===
-  export default {
-    async fetch(request, env) {
-      if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
-      const { prompt } = await request.json();
-      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${env.DEEPSEEK_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'deepseek-chat',
-          messages: [{ role: 'user', content: prompt }]
-        })
-      });
-      const data = await response.json();
-      return new Response(JSON.stringify({ result: data.choices[0].message.content }), {
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
   };
-  */
+  window.clearData = function() {
+    if (confirm('Удалить все данные?')) { localStorage.clear(); location.reload(); }
+  };
+  window.openOnboarding = function() { document.getElementById('onboarding-modal').style.display = 'flex'; };
+
+  // === Персонаж ===
+  const phrases = ["Я тут, чтобы помочь!", "Ты справишься!", "Всё получится!", "Я верю в тебя!"];
+  window.showGuardianPhrase = function() { alert(phrases[Math.floor(Math.random() * phrases.length)]); };
+
+  // === Инструкция ===
+  console.log('Для включения монетизации: раскомментируйте кнопки VK Pay в HTML и JS');
 </script>
 </body>
 </html>
