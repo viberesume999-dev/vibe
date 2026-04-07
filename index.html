@@ -156,22 +156,61 @@
 
 <script>
   // === НАСТРОЙКИ ===
-  const DEEPSEEK_PROXY_URL = 'ВАШ_CLOUDFLARE_WORKER_URL'; // ЗАМЕНИТЕ НА ВАШ URL
+  const DEEPSEEK_PROXY_URL = 'https://deepseek-proxy.viberesume999.workers.dev'; // ЗАМЕНИТЕ НА ВАШ URL
   let generationCountToday = parseInt(localStorage.getItem('generationCount') || '0');
   let currentResumeText = '';
   let currentCoverText = '';
   let currentUserName = '';
 
-  // === Переключение вкладок ===
-  document.querySelectorAll('.tab-button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const tabId = btn.getAttribute('data-tab');
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-      document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      btn.classList.add('active');
-    });
+  // === Инициализация после загрузки DOM ===
+  document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация обработчиков событий
+    initializeEventListeners();
+    
+    // Проверка первого запуска
+    if (!localStorage.getItem('onboarded')) {
+      document.getElementById('onboarding-modal').style.display = 'flex';
+    } else {
+      document.getElementById('onboarding-modal').style.display = 'none';
+      loadProfile();
+      loadGallery();
+    }
   });
+
+  function initializeEventListeners() {
+    // Обработчик изменения чекбокса согласия
+    const consent1 = document.getElementById('consent1');
+    const startBtn = document.getElementById('start-btn');
+    
+    if (consent1 && startBtn) {
+      consent1.addEventListener('change', function() {
+        startBtn.disabled = !this.checked;
+      });
+      
+      startBtn.addEventListener('click', function() {
+        if (!consent1.checked) return;
+        localStorage.setItem('region', document.getElementById('region').value);
+        localStorage.setItem('segment', document.getElementById('segment').value);
+        localStorage.setItem('consent1', 'true');
+        localStorage.setItem('consent2', document.getElementById('consent2').checked);
+        localStorage.setItem('onboarded', 'true');
+        document.getElementById('onboarding-modal').style.display = 'none';
+        loadProfile();
+        loadGallery();
+      });
+    }
+
+    // Обработчики переключения вкладок
+    document.querySelectorAll('.tab-button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabId = btn.getAttribute('data-tab');
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        btn.classList.add('active');
+      });
+    });
+  }
 
   // === Режимы создания ===
   window.toggleMode = function() {
@@ -179,36 +218,13 @@
     document.getElementById('simple-mode').classList.toggle('hidden', mode !== 'simple');
     document.getElementById('vacancy-mode').classList.toggle('hidden', mode !== 'vacancy');
   };
-// === VK Bridge (без ошибок вне VK) ===
+
+  // === VK Bridge (без ошибок вне VK) ===
   let vkBridge = { send: () => Promise.resolve() };
   if (window.vkBridge) {
     vkBridge = window.vkBridge;
     try { vkBridge.send('VKWebAppInit'); } catch(e) { console.log('VK Bridge не инициализирован'); }
   }
-
-  // === Первый запуск ===
-  if (!localStorage.getItem('onboarded')) {
-    document.getElementById('onboarding-modal').style.display = 'flex';
-  } else {
-    document.getElementById('onboarding-modal').style.display = 'none';
-    loadProfile();
-    loadGallery();
-  }
-
-  document.getElementById('consent1').addEventListener('change', function() {
-    document.getElementById('start-btn').disabled = !this.checked;
-  });
-  document.getElementById('start-btn').addEventListener('click', function() {
-    if (!document.getElementById('consent1').checked) return;
-    localStorage.setItem('region', document.getElementById('region').value);
-    localStorage.setItem('segment', document.getElementById('segment').value);
-    localStorage.setItem('consent1', 'true');
-    localStorage.setItem('consent2', document.getElementById('consent2').checked);
-    localStorage.setItem('onboarded', 'true');
-    document.getElementById('onboarding-modal').style.display = 'none';
-    loadProfile();
-    loadGallery();
-  });
 
   // === Санитизация ===
   function sanitizeText(text) {
@@ -236,11 +252,11 @@
   function fallbackTemplate(style, isCover = false) {
     const templates = {
       resume: [
-        ✨ Ваше резюме в стиле "${style}" готово! Мы подчеркнули ваши сильные стороны.,
-        🔥 Стиль "${style}" добавил харизмы вашему опыту. Такое резюме точно заметят.
+        `✨ Ваше резюме в стиле "${style}" готово! Мы подчеркнули ваши сильные стороны.`,
+        `🔥 Стиль "${style}" добавил харизмы вашему опыту. Такое резюме точно заметят.`
       ],
       cover: [
-        Здравствуйте! Меня заинтересовала ваша вакансия. Мой опыт и навыки отлично подходят. Буду рад обсудить детали.
+        "Здравствуйте! Меня заинтересовала ваша вакансия. Мой опыт и навыки отлично подходят. Буду рад обсудить детали."
       ]
     };
     const list = isCover ? templates.cover : templates.resume;
@@ -256,7 +272,7 @@
     const userName = document.getElementById('user-name').value;
     const style = document.getElementById('style-simple').value;
     const cleanText = sanitizeText(rawText);
-    const prompt = Перепиши резюме в стиле "${style}". Сохрани все ключевые факты, сделай текст живым, но профессиональным. Не добавляй имя, телефон, email. Вот текст: ${cleanText};
+    const prompt = `Перепиши резюме в стиле "${style}". Сохрани все ключевые факты, сделай текст живым, но профессиональным. Не добавляй имя, телефон, email. Вот текст: ${cleanText}`;
 
     let result = await generateViaDeepSeek(prompt);
     if (!result) result = fallbackTemplate(style, false);
@@ -274,12 +290,13 @@
     const vacancyText = document.getElementById('vacancy-text').value;
     if (!resumeText.trim() || !vacancyText.trim()) { alert('Заполните оба поля'); return; }
     if (generationCountToday >= 5) { alert('Лимит 5 генераций в день'); return; }
-const userName = document.getElementById('user-name-vacancy').value;
+    
+    const userName = document.getElementById('user-name-vacancy').value;
     const style = document.getElementById('style-vacancy').value;
     const cleanResume = sanitizeText(resumeText);
     const cleanVacancy = sanitizeText(vacancyText);
-    const resumePrompt = Адаптируй резюме под эту вакансию. Стиль: "${style}". Резюме: ${cleanResume}. Вакансия: ${cleanVacancy}. Не добавляй имя, телефон, email.;
-    const coverPrompt = Напиши короткое сопроводительное письмо в стиле "${style}" к резюме: ${cleanResume}. Вакансия: ${cleanVacancy}. Без имени, без контактов.;
+    const resumePrompt = `Адаптируй резюме под эту вакансию. Стиль: "${style}". Резюме: ${cleanResume}. Вакансия: ${cleanVacancy}. Не добавляй имя, телефон, email.`;
+    const coverPrompt = `Напиши короткое сопроводительное письмо в стиле "${style}" к резюме: ${cleanResume}. Вакансия: ${cleanVacancy}. Без имени, без контактов.`;
 
     let resumeResult = await generateViaDeepSeek(resumePrompt);
     if (!resumeResult) resumeResult = fallbackTemplate(style, false);
@@ -337,19 +354,26 @@ const userName = document.getElementById('user-name-vacancy').value;
     }
     document.getElementById('resume-modal').style.display = 'flex';
   };
+  
   window.closeModal = function() { document.getElementById('resume-modal').style.display = 'none'; };
 
   window.downloadCurrentAsPDF = function() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.text(currentResumeText, 10, 10);
-    if (currentUserName) doc.text(Имя: ${currentUserName}, 10, 50);
+    const splitText = doc.splitTextToSize(currentResumeText, 180);
+    doc.text(splitText, 10, 10);
+    if (currentUserName) {
+      const yPos = 15 + (splitText.length * 7);
+      doc.text(`Имя: ${currentUserName}`, 10, yPos);
+    }
     doc.save('resume.pdf');
   };
+  
   window.downloadCoverLetter = function() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.text(currentCoverText, 10, 10);
+    const splitText = doc.splitTextToSize(currentCoverText, 180);
+    doc.text(splitText, 10, 10);
     doc.save('cover_letter.pdf');
   };
 
@@ -357,14 +381,16 @@ const userName = document.getElementById('user-name-vacancy').value;
     const gallery = JSON.parse(localStorage.getItem('gallery') || '[]');
     document.getElementById('resume-count').textContent = gallery.length;
     const progress = generationCountToday % 3;
-    document.getElementById('progress-text').textContent = ${progress}/3;
-    document.getElementById('progress-bar').style.width = ${(progress / 3) * 100}%;
+    document.getElementById('progress-text').textContent = `${progress}/3`;
+    document.getElementById('progress-bar').style.width = `${(progress / 3) * 100}%`;
     const quotes = ["Сделай шаг — и дорога появится.", "Ты сильнее, чем думаешь.", "Каждый день — новая возможность."];
     document.getElementById('daily-quote').textContent = quotes[Math.floor(Math.random() * quotes.length)];
-};
+  };
+  
   window.clearData = function() {
     if (confirm('Удалить все данные?')) { localStorage.clear(); location.reload(); }
   };
+  
   window.openOnboarding = function() { document.getElementById('onboarding-modal').style.display = 'flex'; };
 
   const phrases = ["Я тут, чтобы помочь!", "Ты справишься!", "Всё получится!"];
