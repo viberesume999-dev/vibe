@@ -365,25 +365,55 @@
   
   window.closeModal = function() { document.getElementById('resume-modal').style.display = 'none'; };
 
+    // Функция очистки от Markdown разметки
+  function cleanMarkdown(text) {
+    if (!text) return '';
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Жирный
+      .replace(/\*(.*?)\*/g, '$1')     // Курсив
+      .replace(/###\s?(.*)/g, '$1')    // Заголовки H3
+      .replace(/##\s?(.*)/g, '$1')     // Заголовки H2
+      .replace(/#\s?(.*)/g, '$1')      // Заголовки H1
+      .replace(/-\s?(.*)/g, '$1')      // Списки
+      .replace(/\d+\.\s?(.*)/g, '$1')  // Нумерованные списки
+      .replace(/`/g, '')               // Код
+      .replace(/>/g, '')               // Цитаты
+      .trim();
+  }
+
   window.downloadCurrentAsPDF = function() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    const splitText = doc.splitTextToSize(currentResumeText, 180);
+    
+    // Очищаем текст от разметки
+    const cleanText = cleanMarkdown(currentResumeText);
+    
+    // Разбиваем текст на строки, чтобы он не вылезал за поля
+    const splitText = doc.splitTextToSize(cleanText, 180);
+    
     doc.text(splitText, 10, 10);
+    
     if (currentUserName) {
       const yPos = 15 + (splitText.length * 7);
       doc.text(`Имя: ${currentUserName}`, 10, yPos);
     }
+    
     doc.save('resume.pdf');
   };
   
   window.downloadCoverLetter = function() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    const splitText = doc.splitTextToSize(currentCoverText, 180);
+    
+    // Очищаем текст от разметки
+    const cleanText = cleanMarkdown(currentCoverText);
+    
+    const splitText = doc.splitTextToSize(cleanText, 180);
     doc.text(splitText, 10, 10);
+    
     doc.save('cover_letter.pdf');
   };
+
 
   window.loadProfile = function() {
     const gallery = JSON.parse(localStorage.getItem('gallery') || '[]');
