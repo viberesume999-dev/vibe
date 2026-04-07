@@ -4,8 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>VibeResume</title>
+  <!-- VK Bridge -->
   <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Библиотека для рендеринга Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
   <style>
     :root {
       --bg-color: #FDF8F0;
@@ -22,7 +25,7 @@
       background: white; display: flex; border-top: 1px solid #eee;
       z-index: 100;
     }
-        .tab-button {
+    .tab-button {
       flex: 1; 
       padding: 12px; 
       text-align: center; 
@@ -30,11 +33,10 @@
       border: none; 
       background: none; 
       font-size: 16px;
-      color: #5B3A29; /* Добавлен цвет текста для неактивных кнопок */
-      opacity: 0.7;   /* Немного прозрачности для неактивного состояния */
+      color: #5B3A29;
+      opacity: 0.7;
     }
-
-    .tab-button.active { font-weight: bold; color: var(--primary-color); }
+    .tab-button.active { font-weight: bold; color: var(--primary-color); opacity: 1; }
     .card {
       background: white; border-radius: var(--border-radius); padding: 16px;
       margin-bottom: 16px; box-shadow: var(--shadow);
@@ -59,9 +61,13 @@
     }
     .modal-content {
       background: white; padding: 20px; border-radius: var(--border-radius);
-      max-width: 90%; max-height: 80%; overflow-y: auto;
+      max-width: 90%; width: 400px; max-height: 85%; overflow-y: auto;
+      position: relative;
     }
-    .close { float: right; font-size: 24px; cursor: pointer; }
+    .close { 
+      position: absolute; top: 15px; right: 20px;
+      font-size: 28px; cursor: pointer; color: #999; 
+    }
     .hidden { display: none; }
     .guardian {
       position: fixed; bottom: 80px; right: 16px;
@@ -71,7 +77,52 @@
       box-shadow: var(--shadow); z-index: 100;
     }
     .quote { font-style: italic; color: #555; margin: 8px 0; }
-    pre { white-space: pre-wrap; font-family: inherit; margin: 12px 0; }
+    
+    /* Стили для отображения Markdown резюме */
+    .resume-content {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #333;
+      max-height: 60vh;
+      overflow-y: auto;
+      padding: 5px;
+      background: #fafafa;
+      border-radius: 8px;
+      border: 1px solid #eee;
+      margin-bottom: 15px;
+    }
+    .resume-content h1, .resume-content h2, .resume-content h3 {
+      color: var(--primary-color);
+      margin-top: 16px;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    .resume-content h1 { font-size: 22px; border-bottom: 2px solid #eee; padding-bottom: 8px; }
+    .resume-content h2 { font-size: 18px; }
+    .resume-content h3 { font-size: 16px; }
+    .resume-content ul, .resume-content ol {
+      padding-left: 20px;
+      margin: 8px 0;
+    }
+    .resume-content li {
+      margin-bottom: 4px;
+    }
+    .resume-content p {
+      margin-bottom: 12px;
+    }
+    .resume-content strong {
+      color: #000;
+      font-weight: 700;
+    }
+    /* Убираем стандартные отступы pre, так как используем div */
+    #resume-content, #cover-content {
+      white-space: normal;
+      font-family: inherit;
+      margin: 0;
+      padding: 0;
+      background: none;
+      border: none;
+    }
   </style>
 </head>
 <body>
@@ -89,8 +140,14 @@
     <select id="segment">
       <option>Студент</option><option>Женщина</option><option>Обычный соискатель</option>
     </select>
-    <label><input type="checkbox" id="consent1" required> Я согласен на обработку текста резюме для генерации</label>
-    <label><input type="checkbox" id="consent2"> Я согласен на сохранение имени на моём устройстве для PDF</label>
+    <label style="display:flex; align-items:center; gap:10px; margin: 10px 0;">
+      <input type="checkbox" id="consent1" required style="width:auto; margin:0;"> 
+      <span style="font-size:14px;">Я согласен на обработку текста резюме</span>
+    </label>
+    <label style="display:flex; align-items:center; gap:10px; margin: 10px 0;">
+      <input type="checkbox" id="consent2" style="width:auto; margin:0;"> 
+      <span style="font-size:14px;">Согласен на сохранение имени для копирования</span>
+    </label>
     <button id="start-btn" disabled>Начать</button>
   </div>
 </div>
@@ -101,9 +158,10 @@
   <button class="tab-button" data-tab="create">Создать</button>
   <button class="tab-button" data-tab="profile">Профиль</button>
 </div>
+
 <!-- Галерея -->
 <div id="gallery" class="tab-content active">
-  <div class="card"><h3>Мои резюме</h3><div class="grid" id="gallery-grid"></div><button onclick="clearGallery()">Очистить галерею</button></div>
+  <div class="card"><h3>Мои резюме</h3><div class="grid" id="gallery-grid"></div><button onclick="clearGallery()" style="margin-top:15px;">Очистить галерею</button></div>
 </div>
 
 <!-- Создать -->
@@ -113,8 +171,8 @@
     <label><input type="radio" name="mode" value="vacancy" onchange="toggleMode()"> Под вакансию</label>
   </div>
   <div class="card" id="simple-mode">
-    <textarea id="resume-text" placeholder="Вставьте текст резюме (имя, телефон, email можно не убирать — они автоматически удалятся)"></textarea>
-    <input type="text" id="user-name" placeholder="Ваше имя (для PDF, опционально)">
+    <textarea id="resume-text" rows="5" placeholder="Вставьте текст резюме (имя, телефон, email можно не убирать — они автоматически удалятся)"></textarea>
+    <input type="text" id="user-name" placeholder="Ваше имя (отобразится в заголовке)">
     <select id="style-simple">
       <option>Дерзкий</option><option>Мягкий</option><option>Киберпанк</option>
       <option>Минимализм</option><option>Поэтичный</option>
@@ -122,9 +180,9 @@
     <button onclick="generateSimple()">Сгенерировать</button>
   </div>
   <div class="card hidden" id="vacancy-mode">
-    <textarea id="resume-text-vacancy" placeholder="Текст вашего резюме"></textarea>
-    <textarea id="vacancy-text" placeholder="Текст вакансии"></textarea>
-    <input type="text" id="user-name-vacancy" placeholder="Ваше имя (для PDF, опционально)">
+    <textarea id="resume-text-vacancy" rows="4" placeholder="Текст вашего резюме"></textarea>
+    <textarea id="vacancy-text" rows="4" placeholder="Текст вакансии"></textarea>
+    <input type="text" id="user-name-vacancy" placeholder="Ваше имя (отобразится в заголовке)">
     <select id="style-vacancy">
       <option>Дерзкий</option><option>Мягкий</option><option>Киберпанк</option>
       <option>Минимализм</option><option>Поэтичный</option>
@@ -138,13 +196,16 @@
   <div class="card">
     <h3>Профиль</h3>
     <p class="quote" id="daily-quote">Загрузка...</p>
-    <p>До следующей рамки: <span id="progress-text">0/3</span></p>
+    <p style="margin-top:10px;">До следующей рамки: <span id="progress-text">0/3</span></p>
     <div style="background:#eee;height:10px;border-radius:5px;margin:8px 0;"><div id="progress-bar" style="width:0;height:100%;background:#5B3A29;border-radius:5px;"></div></div>
-    <button onclick="clearData()">Очистить мои данные</button>
-    <p>Создано резюме: <span id="resume-count">0</span></p>
-    <button onclick="openOnboarding()">Изменить регион/сегмент</button>
-    <p><a href="#" target="_blank">Пользовательское соглашение</a> | <a href="#" target="_blank">Политика конфиденциальности</a></p>
-    <p><a href="#" target="_blank">Поддержка</a></p>
+    <button onclick="clearData()" style="background-color:#d9534f;">Очистить мои данные</button>
+    <p style="margin-top:15px;">Создано резюме: <strong id="resume-count">0</strong></p>
+    <button onclick="openOnboarding()" style="background-color:#777;">Изменить регион/сегмент</button>
+    <p style="margin-top:15px; font-size:12px; color:#777;">
+      <a href="#" target="_blank">Пользовательское соглашение</a> | 
+      <a href="#" target="_blank">Политика конфиденциальности</a>
+    </p>
+    <p style="font-size:12px; color:#777;"><a href="#" target="_blank">Поддержка</a></p>
   </div>
 </div>
 
@@ -155,16 +216,25 @@
 <div id="resume-modal" class="modal">
   <div class="modal-content">
     <span class="close" onclick="closeModal()">&times;</span>
-    <h3>Ваше резюме</h3>
-    <pre id="resume-content"></pre>
-    <button onclick="downloadCurrentAsPDF()">Скачать PDF (бесплатно, тест)</button>
-    <button id="download-cover-btn" class="hidden" onclick="downloadCoverLetter()">Скачать сопроводительное</button>
+    <h3 style="margin-bottom:10px;">Ваше резюме</h3>
+    
+    <!-- Контейнер для красивого вывода Markdown -->
+    <div id="resume-content" class="resume-content"></div>
+    
+    <button onclick="copyResumeText()">Копировать текст</button>
+    
+    <!-- Блок сопроводительного письма -->
+    <div id="cover-letter-block" class="hidden" style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+      <h4 style="margin-bottom:10px; color:var(--primary-color);">Сопроводительное письмо:</h4>
+      <div id="cover-content" class="resume-content" style="max-height: 200px; font-size: 14px;"></div>
+      <button onclick="copyCoverText()" style="background-color: #777; margin-top: 8px;">Копировать сопроводительное</button>
+    </div>
   </div>
 </div>
 
 <script>
   // === НАСТРОЙКИ ===
-  const DEEPSEEK_PROXY_URL = 'https://deepseek-proxy.viberesume999.workers.dev'; // ЗАМЕНИТЕ НА ВАШ URL
+  const DEEPSEEK_PROXY_URL = 'https://deepseek-proxy.viberesume999.workers.dev'; 
   let generationCountToday = parseInt(localStorage.getItem('generationCount') || '0');
   let currentResumeText = '';
   let currentCoverText = '';
@@ -172,10 +242,8 @@
 
   // === Инициализация после загрузки DOM ===
   document.addEventListener('DOMContentLoaded', function() {
-    // Инициализация обработчиков событий
     initializeEventListeners();
     
-    // Проверка первого запуска
     if (!localStorage.getItem('onboarded')) {
       document.getElementById('onboarding-modal').style.display = 'flex';
     } else {
@@ -186,7 +254,6 @@
   });
 
   function initializeEventListeners() {
-    // Обработчик изменения чекбокса согласия
     const consent1 = document.getElementById('consent1');
     const startBtn = document.getElementById('start-btn');
     
@@ -208,7 +275,6 @@
       });
     }
 
-    // Обработчики переключения вкладок
     document.querySelectorAll('.tab-button').forEach(btn => {
       btn.addEventListener('click', () => {
         const tabId = btn.getAttribute('data-tab');
@@ -220,14 +286,13 @@
     });
   }
 
-  // === Режимы создания ===
   window.toggleMode = function() {
     const mode = document.querySelector('input[name="mode"]:checked').value;
     document.getElementById('simple-mode').classList.toggle('hidden', mode !== 'simple');
     document.getElementById('vacancy-mode').classList.toggle('hidden', mode !== 'vacancy');
   };
 
-  // === VK Bridge (без ошибок вне VK) ===
+  // === VK Bridge ===
   let vkBridge = { send: () => Promise.resolve() };
   if (window.vkBridge) {
     vkBridge = window.vkBridge;
@@ -280,7 +345,7 @@
     const userName = document.getElementById('user-name').value;
     const style = document.getElementById('style-simple').value;
     const cleanText = sanitizeText(rawText);
-    const prompt = `Перепиши резюме в стиле "${style}". Сохрани все ключевые факты, сделай текст живым, но профессиональным. Не добавляй имя, телефон, email. Вот текст: ${cleanText}`;
+    const prompt = `Перепиши резюме в стиле "${style}". Сохрани все ключевые факты, сделай текст живым, но профессиональным. Используй Markdown форматирование (заголовки, списки, жирный шрифт). Не добавляй имя, телефон, email. Вот текст: ${cleanText}`;
 
     let result = await generateViaDeepSeek(prompt);
     if (!result) result = fallbackTemplate(style, false);
@@ -303,8 +368,8 @@
     const style = document.getElementById('style-vacancy').value;
     const cleanResume = sanitizeText(resumeText);
     const cleanVacancy = sanitizeText(vacancyText);
-    const resumePrompt = `Адаптируй резюме под эту вакансию. Стиль: "${style}". Резюме: ${cleanResume}. Вакансия: ${cleanVacancy}. Не добавляй имя, телефон, email.`;
-    const coverPrompt = `Напиши короткое сопроводительное письмо в стиле "${style}" к резюме: ${cleanResume}. Вакансия: ${cleanVacancy}. Без имени, без контактов.`;
+    const resumePrompt = `Адаптируй резюме под эту вакансию. Стиль: "${style}". Используй Markdown. Резюме: ${cleanResume}. Вакансия: ${cleanVacancy}. Не добавляй имя, телефон, email.`;
+    const coverPrompt = `Напиши короткое сопроводительное письмо в стиле "${style}" к резюме. Используй Markdown. Резюме: ${cleanResume}. Вакансия: ${cleanVacancy}. Без имени, без контактов.`;
 
     let resumeResult = await generateViaDeepSeek(resumePrompt);
     if (!resumeResult) resumeResult = fallbackTemplate(style, false);
@@ -350,70 +415,67 @@
     if (confirm('Очистить галерею?')) { localStorage.removeItem('gallery'); loadGallery(); }
   };
 
+  // === Отображение резюме с Markdown ===
   window.showResumeModal = function(resume, cover) {
-    document.getElementById('resume-content').textContent = resume;
-    const coverBtn = document.getElementById('download-cover-btn');
+    const resumeContainer = document.getElementById('resume-content');
+    const coverBlock = document.getElementById('cover-letter-block');
+    const coverContainer = document.getElementById('cover-content');
+
+    // Рендерим Markdown в HTML
+    resumeContainer.innerHTML = marked.parse(resume);
+    
     if (cover && cover.trim()) {
-      coverBtn.classList.remove('hidden');
+      coverBlock.classList.remove('hidden');
+      coverContainer.innerHTML = marked.parse(cover);
       currentCoverText = cover;
     } else {
-      coverBtn.classList.add('hidden');
+      coverBlock.classList.add('hidden');
       currentCoverText = '';
     }
+    
+    currentResumeText = resume;
     document.getElementById('resume-modal').style.display = 'flex';
   };
   
-  window.closeModal = function() { document.getElementById('resume-modal').style.display = 'none'; };
+  window.closeModal = function() { 
+    document.getElementById('resume-modal').style.display = 'none'; 
+  };
 
-    // Функция очистки от Markdown разметки
-  function cleanMarkdown(text) {
-    if (!text) return '';
-    return text
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Жирный
-      .replace(/\*(.*?)\*/g, '$1')     // Курсив
-      .replace(/###\s?(.*)/g, '$1')    // Заголовки H3
-      .replace(/##\s?(.*)/g, '$1')     // Заголовки H2
-      .replace(/#\s?(.*)/g, '$1')      // Заголовки H1
-      .replace(/-\s?(.*)/g, '$1')      // Списки
-      .replace(/\d+\.\s?(.*)/g, '$1')  // Нумерованные списки
-      .replace(/`/g, '')               // Код
-      .replace(/>/g, '')               // Цитаты
-      .trim();
-  }
-
-  window.downloadCurrentAsPDF = function() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    // Очищаем текст от разметки
-    const cleanText = cleanMarkdown(currentResumeText);
-    
-    // Разбиваем текст на строки, чтобы он не вылезал за поля
-    const splitText = doc.splitTextToSize(cleanText, 180);
-    
-    doc.text(splitText, 10, 10);
+  // === Копирование текста ===
+  window.copyResumeText = function() {
+    // Создаем временный элемент для получения чистого текста без HTML тегов
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = marked.parse(currentResumeText);
+    const textToCopy = tempDiv.innerText || tempDiv.textContent;
     
     if (currentUserName) {
-      const yPos = 15 + (splitText.length * 7);
-      doc.text(`Имя: ${currentUserName}`, 10, yPos);
+      navigator.clipboard.writeText(`Имя: ${currentUserName}\n\n${textToCopy}`).then(() => {
+        alert('Резюме скопировано в буфер обмена!');
+      }).catch(err => {
+        alert('Ошибка копирования');
+      });
+    } else {
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        alert('Резюме скопировано в буфер обмена!');
+      }).catch(err => {
+        alert('Ошибка копирования');
+      });
     }
-    
-    doc.save('resume.pdf');
-  };
-  
-  window.downloadCoverLetter = function() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    // Очищаем текст от разметки
-    const cleanText = cleanMarkdown(currentCoverText);
-    
-    const splitText = doc.splitTextToSize(cleanText, 180);
-    doc.text(splitText, 10, 10);
-    
-    doc.save('cover_letter.pdf');
   };
 
+  window.copyCoverText = function() {
+    if (!currentCoverText) return;
+    
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = marked.parse(currentCoverText);
+    const textToCopy = tempDiv.innerText || tempDiv.textContent;
+
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      alert('Сопроводительное скопировано!');
+    }).catch(err => {
+      alert('Ошибка копирования');
+    });
+  };
 
   window.loadProfile = function() {
     const gallery = JSON.parse(localStorage.getItem('gallery') || '[]');
@@ -436,3 +498,4 @@
 </script>
 </body>
 </html>
+
